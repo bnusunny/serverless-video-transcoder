@@ -1,0 +1,210 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  serverless-video-transcoding
+
+Parameters:
+  VideosBucketName:
+    Type: String
+    Description: "REQUIRED: Unique S3 bucket name to use for the app."
+  EFSpath:
+    Type: String
+    Default: /mnt/efs
+  SecurityGroupIds:
+    Type: CommaDelimitedList
+    Default: sg-c3677dbf
+  SubnetIDs:
+    Type: CommaDelimitedList
+    Description: The list of SubnetIDs in your Virtual Private Cloud (VPC)
+    Default: subnet-1c8b6354,subnet-b80953e3
+  AccessPointID:
+    Type: String
+    Description: Access point ID
+    Default: fsap-09841f6b8b4e36be8
+  FileSystemID:
+    Type: String
+    Description: EFS File System ID
+    Default: fs-63b65743
+
+Globals:
+  Function:
+    Timeout: 30
+    Runtime: python3.8
+    MemorySize: 512
+
+Resources:
+  VideosBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref VideosBucketName
+
+  FFmpegLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      ContentUri: layers/ffmpeg_layer
+      CompatibleRuntimes:
+        - python3.8
+    Metadata:
+      BuildMethod: makefile
+
+  TriggerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: functions/trigger_function/
+      Handler: app.lambda_handler
+      Policies:
+        - S3ReadPolicy:
+            BucketName: !Ref VideosBucketName
+      Events:
+        S3NewObjectEvent:
+          Type: S3
+          Properties:
+            Bucket: !Ref VideosBucket
+            Events: s3:ObjectCreated:*
+            Filter:
+              S3Key:
+                Rules:
+                  - Name: suffix
+                    Value: ".mp4"
+
+  MainStateMachine:
+    Type: AWS::Serverless::StateMachine
+    Properties:
+      DefinitionUri: statemachines/main.asl.json
+      Policies:
+        - CloudWatchLogsFullAccess
+
+  SplitMediaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: functions/split_media_function/
+      Handler: app.lambda_handler
+      MemorySize: 3008
+      Timeout: 900
+      Environment:
+        Variables:
+          EFS_PATH: !Ref EFSpath
+      Layers:
+        - !Ref FFmpegLayer
+      Policies:
+        - S3ReadPolicy:
+            BucketName: !Ref VideosBucketName
+        - S3WritePolicy:
+            BucketName: !Ref VideosBucketName
+        - EFSWriteAccessPolicy:
+            FileSystem: !Ref FileSystemID
+            AccessPoint: !Ref AccessPointID
+      VpcConfig:
+        SecurityGroupIds: !Ref SecurityGroupIds
+        SubnetIds: !Ref SubnetIDs
+      FileSystemConfigs:
+        - Arn: !Sub "arn:${AWS::Partition}:elasticfilesystem:${AWS::Region}:${AWS::AccountId}:access-point/${AccessPointID}"
+          LocalMountPath: !Ref EFSpath
+
+  AudioTranscodeFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: functions/audio_transcode_function/
+      Handler: app.lambda_handler
+      MemorySize: 3008
+      Timeout: 900
+      Environment:
+        Variables:
+          EFS_PATH: !Ref EFSpath
+      Layers:
+        - !Ref FFmpegLayer
+      Policies:
+        - S3ReadPolicy:
+            BucketName: !Ref VideosBucketName
+        - S3WritePolicy:
+            BucketName: !Ref VideosBucketName
+        - EFSWriteAccessPolicy:
+            FileSystem: !Ref FileSystemID
+            AccessPoint: !Ref AccessPointID
+      VpcConfig:
+        SecurityGroupIds: !Ref SecurityGroupIds
+        SubnetIds: !Ref SubnetIDs
+      FileSystemConfigs:
+        - Arn: !Sub "arn:${AWS::Partition}:elasticfilesystem:${AWS::Region}:${AWS::AccountId}:access-point/${AccessPointID}"
+          LocalMountPath: !Ref EFSpath
+
+  VideoTranscodeFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: functions/video_transcode_function/
+      Handler: app.lambda_handler
+      MemorySize: 3008
+      Timeout: 900
+      Environment:
+        Variables:
+          EFS_PATH: !Ref EFSpath
+      Layers:
+        - !Ref FFmpegLayer
+      Policies:
+        - S3ReadPolicy:
+            BucketName: !Ref VideosBucketName
+        - S3WritePolicy:
+            BucketName: !Ref VideosBucketName
+        - EFSWriteAccessPolicy:
+            FileSystem: !Ref FileSystemID
+            AccessPoint: !Ref AccessPointID
+      VpcConfig:
+        SecurityGroupIds: !Ref SecurityGroupIds
+        SubnetIds: !Ref SubnetIDs
+      FileSystemConfigs:
+        - Arn: !Sub "arn:${AWS::Partition}:elasticfilesystem:${AWS::Region}:${AWS::AccountId}:access-point/${AccessPointID}"
+          LocalMountPath: !Ref EFSpath
+
+  MergeMediaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: functions/merge_media_function/
+      Handler: app.lambda_handler
+      MemorySize: 3008
+      Timeout: 900
+      Environment:
+        Variables:
+          EFS_PATH: !Ref EFSpath
+      Layers:
+        - !Ref FFmpegLayer
+      Policies:
+        - S3ReadPolicy:
+            BucketName: !Ref VideosBucketName
+        - S3WritePolicy:
+            BucketName: !Ref VideosBucketName
+        - EFSWriteAccessPolicy:
+            FileSystem: !Ref FileSystemID
+            AccessPoint: !Ref AccessPointID
+      VpcConfig:
+        SecurityGroupIds: !Ref SecurityGroupIds
+        SubnetIds: !Ref SubnetIDs
+      FileSystemConfigs:
+        - Arn: !Sub "arn:${AWS::Partition}:elasticfilesystem:${AWS::Region}:${AWS::AccountId}:access-point/${AccessPointID}"
+          LocalMountPath: !Ref EFSpath
+
+  GenerateHLSFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: functions/generate_hls_function/
+      Handler: app.lambda_handler
+      MemorySize: 3008
+      Timeout: 900
+      Environment:
+        Variables:
+          EFS_PATH: !Ref EFSpath
+      Layers:
+        - !Ref FFmpegLayer
+      Policies:
+        - S3ReadPolicy:
+            BucketName: !Ref VideosBucketName
+        - S3WritePolicy:
+            BucketName: !Ref VideosBucketName
+        - EFSWriteAccessPolicy:
+            FileSystem: !Ref FileSystemID
+            AccessPoint: !Ref AccessPointID
+      VpcConfig:
+        SecurityGroupIds: !Ref SecurityGroupIds
+        SubnetIds: !Ref SubnetIDs
+      FileSystemConfigs:
+        - Arn: !Sub "arn:${AWS::Partition}:elasticfilesystem:${AWS::Region}:${AWS::AccountId}:access-point/${AccessPointID}"
+          LocalMountPath: !Ref EFSpath
