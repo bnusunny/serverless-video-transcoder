@@ -20,11 +20,11 @@ Parameters:
   AccessPointID:
     Type: String
     Description: Access point ID
-    Default: fsap-09841f6b8b4e36be8
+    Default: fsap-0d0c225da207e39e8
   FileSystemID:
     Type: String
     Description: EFS File System ID
-    Default: fs-63b65743
+    Default: fs-c125e35c
 
 Globals:
   Function:
@@ -38,6 +38,11 @@ Resources:
     Properties:
       BucketName: !Ref VideosBucketName
 
+  JobTable:
+    Type: AWS::Serverless::SimpleTable
+    Properties:
+      TableName: transcode_jobs
+
   FFmpegLayer:
     Type: AWS::Serverless::LayerVersion
     Properties:
@@ -50,11 +55,22 @@ Resources:
   TriggerFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: functions/trigger_function/
+      CodeUri: functions/trigger_statemachine_function/
       Handler: app.lambda_handler
       Policies:
         - S3ReadPolicy:
             BucketName: !Ref VideosBucketName
+        - DynamoDBWritePolicy:
+            TableName: !Ref JobTable
+        - StepFunctionsExecutionPolicy:
+            StateMachineName: !GetAtt MainStateMachine.Name
+      Environment:
+        Variables:
+          JOB_TABLE: !Ref JobTable
+          SFN_ARN: !Ref MainStateMachine
+          ENABLE_HLS: 0
+      Layers:
+        - !Ref FFmpegLayer
       Events:
         S3NewObjectEvent:
           Type: S3
@@ -66,18 +82,71 @@ Resources:
                 Rules:
                   - Name: suffix
                     Value: ".mp4"
+                  - Name: prefix
+                    Value: "input/"
 
   MainStateMachine:
     Type: AWS::Serverless::StateMachine
     Properties:
       DefinitionUri: statemachines/main.asl.json
+      Tracing:
+        Enabled: True
+      DefinitionSubstitutions:
+        SplitVideoFunctionArn: !GetAtt SplitVideoFunction.Arn
+        TranscodeAudioFunctionArn: !GetAtt TranscodeAudioFunction.Arn
+        TranscodeVideoFunctionArn: !GetAtt TranscodeVideoFunction.Arn
+        MergeVideoFunctionArn: !GetAtt MergeVideoFunction.Arn
+        MergeMediaFunctionArn: !GetAtt MergeMediaFunction.Arn
+        GenerateHLSFunctionArn: !GetAtt GenerateHLSFunction.Arn
       Policies:
+        - CloudWatchPutMetricPolicy: {}
         - CloudWatchLogsFullAccess
+        - LambdaInvokePolicy:
+            FunctionName: !Ref SplitVideoFunction
+        - LambdaInvokePolicy:
+            FunctionName: !Ref TranscodeAudioFunction
+        - LambdaInvokePolicy:
+            FunctionName: !Ref TranscodeVideoFunction
+        - LambdaInvokePolicy:
+            FunctionName: !Ref MergeVideoFunction
+        - LambdaInvokePolicy:
+            FunctionName: !Ref MergeMediaFunction
+        - LambdaInvokePolicy:
+            FunctionName: !Ref GenerateHLSFunction
 
-  SplitMediaFunction:
+  SplitVideoFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: functions/split_media_function/
+      CodeUri: functions/split_video_function/
+      Handler: app.lambda_handler
+      MemorySize: 3008
+      Timeout: 900
+      Environment:
+        Variables:
+          EFS_PATH: !Ref EFSpath
+          PARALLEL_GROUPS: 3
+          SEGMENT_TIME: 40
+      Layers:
+        - !Ref FFmpegLayer
+      Policies:
+        - S3ReadPolicy:
+            BucketName: !Ref VideosBucketName
+        - S3WritePolicy:
+            BucketName: !Ref VideosBucketName
+        - EFSWriteAccessPolicy:
+            FileSystem: !Ref FileSystemID
+            AccessPoint: !Ref AccessPointID
+      VpcConfig:
+        SecurityGroupIds: !Ref SecurityGroupIds
+        SubnetIds: !Ref SubnetIDs
+      FileSystemConfigs:
+        - Arn: !Sub "arn:${AWS::Partition}:elasticfilesystem:${AWS::Region}:${AWS::AccountId}:access-point/${AccessPointID}"
+          LocalMountPath: !Ref EFSpath
+
+  TranscodeAudioFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: functions/transcode_audio_function/
       Handler: app.lambda_handler
       MemorySize: 3008
       Timeout: 900
@@ -101,10 +170,10 @@ Resources:
         - Arn: !Sub "arn:${AWS::Partition}:elasticfilesystem:${AWS::Region}:${AWS::AccountId}:access-point/${AccessPointID}"
           LocalMountPath: !Ref EFSpath
 
-  AudioTranscodeFunction:
+  TranscodeVideoFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: functions/audio_transcode_function/
+      CodeUri: functions/transcode_video_function/
       Handler: app.lambda_handler
       MemorySize: 3008
       Timeout: 900
@@ -128,16 +197,17 @@ Resources:
         - Arn: !Sub "arn:${AWS::Partition}:elasticfilesystem:${AWS::Region}:${AWS::AccountId}:access-point/${AccessPointID}"
           LocalMountPath: !Ref EFSpath
 
-  VideoTranscodeFunction:
+  MergeVideoFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: functions/video_transcode_function/
+      CodeUri: functions/merge_video_function/
       Handler: app.lambda_handler
       MemorySize: 3008
       Timeout: 900
       Environment:
         Variables:
           EFS_PATH: !Ref EFSpath
+          MEDIA_BUCKET: !Ref VideosBucketName
       Layers:
         - !Ref FFmpegLayer
       Policies:
@@ -165,6 +235,7 @@ Resources:
       Environment:
         Variables:
           EFS_PATH: !Ref EFSpath
+          MEDIA_BUCKET: !Ref VideosBucketName
       Layers:
         - !Ref FFmpegLayer
       Policies:
