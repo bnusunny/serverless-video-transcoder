@@ -13,7 +13,7 @@ Metadata:
     ReadmeUrl: README.md
     Labels: ['VPC']
     HomePageUrl: https://github.com/bnusunny/serverless-video-transcoder
-    SemanticVersion: 0.0.1
+    SemanticVersion: 0.0.2
     SourceCodeUrl: https://github.com/bnusunny/serverless-video-transcoder
 
 
@@ -54,8 +54,6 @@ Resources:
 
   JobTable:
     Type: AWS::Serverless::SimpleTable
-    Properties:
-      TableName: transcode_jobs
 
   FFmpegLayer:
     Type: AWS::Serverless::LayerVersion
