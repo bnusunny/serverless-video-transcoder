@@ -1,4 +1,4 @@
-# serverless-video-transcoding
+# serverless-video-transcoder
 
 Serverless视频转码：通过Step Functions, Lambda和EFS实现分布式视频转码。适用于按需快速视频转码。Serverless架构，无需管理计算集群。 
 
