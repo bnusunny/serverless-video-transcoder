@@ -17,7 +17,7 @@ Serverless视频转码：通过Step Functions, Lambda和EFS实现分布式视频
 
 ### 快速部署
 
-使用Quickstart/templates目录下的CloudFormation模版，可以快速完成部署。这个模版会新建带有两个公有子网的VPC, S3和DynamoDB Endpoints, S3存储桶，DyanomDB表，Lambda函数和Step Functions状态机。
+使用Quickstart/templates目录下的CloudFormation模版，可以快速完成部署。这个模版会新建带有两个公有子网的VPC, S3和DynamoDB Endpoints, S3存储桶，DyanomDB表，EFS文件系统, Lambda函数和Step Functions状态机。
 
 |           Region            |                     Launch Stack in VPC                      | 
 | :-------------------------: | :----------------------------------------------------------: | 
