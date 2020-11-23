@@ -1,7 +1,21 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
 Description: >
-  serverless-video-transcoding
+  serverless-video-transcoder
+
+Metadata:
+  AWS::ServerlessRepo::Application:
+    Name: serverless-video-transcoder
+    Description: This template deploys Serverless Video Transcoder.
+    Author: Harold Sun
+    SpdxLicenseId: Apache-2.0
+    LicenseUrl: LICENSE
+    ReadmeUrl: README.md
+    Labels: ['VPC']
+    HomePageUrl: https://github.com/bnusunny/serverless-video-transcoder
+    SemanticVersion: 0.0.1
+    SourceCodeUrl: https://github.com/bnusunny/serverless-video-transcoder
+
 
 Parameters:
   VideosBucketName:
@@ -49,8 +63,6 @@ Resources:
       ContentUri: layers/ffmpeg_layer
       CompatibleRuntimes:
         - python3.8
-    Metadata:
-      BuildMethod: makefile
 
   TriggerFunction:
     Type: AWS::Serverless::Function
