@@ -4,8 +4,9 @@ import re
 import glob
 import subprocess
 from urllib.parse import unquote_plus
+from botocore.config import Config
 
-s3_client = boto3.client('s3')
+s3_client = boto3.client('s3', os.environ['AWS_REGION'], config=Config(s3={'addressing_style': 'path'}))
 efs_path = os.environ['EFS_PATH']
 parallel_groups = int(os.environ['PARALLEL_GROUPS'])
 segment_time = os.environ['SEGMENT_TIME']
