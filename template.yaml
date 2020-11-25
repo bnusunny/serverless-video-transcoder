@@ -54,7 +54,7 @@ Parameters:
 Globals:
   Function:
     Timeout: 30
-    Runtime: python3.8
+    Runtime: python3.7
     MemorySize: 512
 
 Resources:
@@ -73,6 +73,8 @@ Resources:
       ContentUri: layers/ffmpeg_layer
       CompatibleRuntimes:
         - python3.8
+        - python3.7
+        - python3.6
 
   TriggerFunction:
     Type: AWS::Serverless::Function
