@@ -50,7 +50,7 @@ sam deploy --guided
 修改下面的参数，其他参数保留默认值。
 - "stack name"输入 serverless-video-transcoder
 - "AWS Region"输入 us-west-2
-- "VideosBucketName"输入 svt-<name>
+- "VideosBucketName"输入 'svt-<name>'
 
 ![](img/8.png)
 
@@ -79,7 +79,7 @@ quickstart/scripts/download-videos.sh
 
 ## 测试1：1080P 8分钟视频转码为720p
 
-运行下面的命令来启动第一个测试。注意要将svt-<name>改成您设置的值。
+运行下面的命令来启动第一个测试。注意要将'svt-<name>'改成您设置的值。
 
 ```
 aws s3 cp videos/topgun_8m_1080p.mp4 s3://svt-<name>/input/topgun01/
@@ -97,7 +97,7 @@ aws s3 cp videos/topgun_8m_1080p.mp4 s3://svt-<name>/input/topgun01/
 
 ## 测试2: 1080p 1小时视频转码为720p
 
-运行下面的命令来启动第二个测试。注意要将svt-<name>改成您设置的值。
+运行下面的命令来启动第二个测试。注意要将'svt-<name>'改成您设置的值。
 
 ```
 aws s3 cp videos/beach_1h_1080p.mp4  s3://svt-<name>/input/beach01/
