@@ -48,9 +48,9 @@ sam deploy --guided
 ```
 
 修改下面的参数，其他参数保留默认值。
-"stack name"输入 serverless-video-transcoder
-"AWS Region"输入 us-west-2
-"VideosBucketName"输入 svt-<name>
+- "stack name"输入 serverless-video-transcoder
+- "AWS Region"输入 us-west-2
+- "VideosBucketName"输入 svt-<name>
 
 ![](img/8.png)
 
