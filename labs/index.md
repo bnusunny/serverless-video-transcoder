@@ -43,7 +43,7 @@ sam build
 ```
 ![](img/7.png)
 
-设置S3存储桶名称svt-{name}，请把“{name}”替换成您的名字，包括”{}“。部署项目
+设置S3存储桶名称svt-{name}，请把“{name}”替换成您的名字，包括”{}“。运行sam deploy部署项目。
 
 ```
 BUCKETNAME=svt-{name}
@@ -58,7 +58,7 @@ sam deploy --region us-west-2 --stack-name serverless-video-transcoder --paramet
 
 ### 扩展EBS空间
 
-Cloud9实例初始EBS卷容量较小，为10GB。运行下面的脚本，把EBS卷容量扩展为100GB。
+Cloud9实例初始EBS卷容量较小，为10GB。运行下面的脚本，把EBS卷容量扩展为100GB。
 
 ```
 quickstart/scripts/resize.sh 100
