@@ -36,21 +36,20 @@ cd serverless-video-transcoder/
 
 ### 部署项目
 
-通过sam部署项目
+通过AWS SAM CLI构建项目
 
 ```
 sam build
 ```
 ![](img/7.png)
 
-```
-sam deploy --guided
-```
+设置S3存储桶名称svt-{name}，请把“{name}”替换成您的名字，包括”{}“。部署项目
 
-修改下面的参数，其他参数保留默认值。
-- "stack name"输入 serverless-video-transcoder
-- "AWS Region"输入 us-west-2
-- "VideosBucketName"输入 svt-{name}. 请把“{name}”替换成您的名字，包括”{}“。
+```
+BUCKETNAME=svt-{name}
+
+sam deploy --region us-west-2 --stack-name serverless-video-transcoder --parameter-overrides VideosBucketName=$BUCKETNAME
+```
 
 ![](img/8.png)
 
@@ -79,16 +78,16 @@ quickstart/scripts/download-videos.sh
 
 ## 测试1：1080P 8分钟视频转码为720p
 
-运行下面的命令来启动第一个测试。注意要将'svt-{name}'改成您设置的值。
+运行下面的命令来启动第一个测试。
 
 ```
-aws s3 cp videos/topgun_8m_1080p.mp4 s3://svt-{name}/input/topgun01/
+aws s3 cp videos/topgun_8m_1080p.mp4 s3://$BUCKETNAME/input/topgun01/
 ```
 打开[Step Functions Console](https://us-west-2.console.aws.amazon.com/states/home?region=us-west-2#), 查看转码工作流运行状态。
 
 ![](img/12.png)
 
-当转码工作流结束后，在S3 console中下载output目录中输出的视频. 播放视频，检查转码质量。 
+当转码工作流结束后，输出的视频存储在[S3 console](https://s3.console.aws.amazon.com/s3/home?region=us-west-2)的$BUCKETNAME/output目录中. 下载视频，播放，检查转码质量。 
 
 ![](img/14.png)
 
@@ -97,16 +96,16 @@ aws s3 cp videos/topgun_8m_1080p.mp4 s3://svt-{name}/input/topgun01/
 
 ## 测试2: 1080p 1小时视频转码为720p
 
-运行下面的命令来启动第二个测试。注意要将'svt-{name}'改成您设置的值。
+运行下面的命令来启动第二个测试。
 
 ```
-aws s3 cp videos/beach_1h_1080p.mp4  s3://svt-{name}/input/beach01/
+aws s3 cp videos/beach_1h_1080p.mp4  s3://$BUCKETNAME/input/beach01/
 ```
 打开Step Functions Console, 查看转码工作流运行状态。
 
 ![](img/15.png)
 
-当转码工作流结束后，在S3 console中下载output目录中输出的视频. 播放视频，检查转码质量。 
+当转码工作流结束后，在S3 console中下载$BUCKETNAME/output目录中输出的视频. 播放视频，检查转码质量。 
 
 ![](img/16.png)
 
@@ -116,7 +115,7 @@ aws s3 cp videos/beach_1h_1080p.mp4  s3://svt-{name}/input/beach01/
 
 ## 清理环境
 
-删除S3存储桶“svt-{name}”中的所有视频，然后在[cloudformation](https://us-west-2.console.aws.amazon.com/cloudformation/home?region=us-west-2)中删除对应的stack。
+删除S3存储桶$BUCKETNAME中的所有视频，然后在[cloudformation](https://us-west-2.console.aws.amazon.com/cloudformation/home?region=us-west-2)中删除所有stack。
 
 
 
