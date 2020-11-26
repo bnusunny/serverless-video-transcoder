@@ -28,7 +28,7 @@
 
 下载代码
 
-```
+```bash
 git clone https://github.com/bnusunny/serverless-video-transcoder.git
 
 cd serverless-video-transcoder/
@@ -40,17 +40,18 @@ cd serverless-video-transcoder/
 
 通过AWS SAM CLI构建项目
 
-```
+```bash
 sam build
 ```
 ![](img/7.png)
 
 设置S3存储桶名称svt-{name}，请把“{name}”替换成您的名字，包括”{}“。运行sam deploy部署项目。
 
-```
+```bash
 BUCKETNAME=svt-{name}
-
-sam deploy --region us-west-2 --stack-name serverless-video-transcoder --parameter-overrides VideosBucketName=$BUCKETNAME
+SAM_BUCKET=sam-upload-`date '+%s'`
+aws s3 mb s3://$SAM_BUCKET
+sam deploy --region us-west-2 --stack-name serverless-video-transcoder --s3-bucket=$SAM_BUCKET --parameter-overrides VideosBucketName=$BUCKETNAME --capabilities=CAPABILITY_IAM
 ```
 
 ![](img/8.png)
@@ -62,7 +63,7 @@ sam deploy --region us-west-2 --stack-name serverless-video-transcoder --paramet
 
 Cloud9实例初始EBS卷容量较小，为10GB。运行下面的脚本，把EBS卷容量扩展为100GB。
 
-```
+```bash
 quickstart/scripts/resize.sh 100
 
 ```
@@ -72,7 +73,7 @@ quickstart/scripts/resize.sh 100
 
 运行下面的脚本，下载测试视频文件。 
 
-```
+```bash
 quickstart/scripts/download-videos.sh
 ```
 ![](img/11.png)
@@ -83,7 +84,7 @@ quickstart/scripts/download-videos.sh
 
 运行下面的命令来启动第一个测试。
 
-```
+```bash
 aws s3 cp videos/topgun_8m_1080p.mp4 s3://$BUCKETNAME/input/topgun01/
 ```
 打开[Step Functions Console](https://us-west-2.console.aws.amazon.com/states/home?region=us-west-2#), 查看转码工作流运行状态。
@@ -101,7 +102,7 @@ aws s3 cp videos/topgun_8m_1080p.mp4 s3://$BUCKETNAME/input/topgun01/
 
 运行下面的命令来启动第二个测试。
 
-```
+```bash
 aws s3 cp videos/beach_1h_1080p.mp4  s3://$BUCKETNAME/input/beach01/
 ```
 打开Step Functions Console, 查看转码工作流运行状态。
