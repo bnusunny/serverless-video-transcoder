@@ -4,11 +4,11 @@
 
 ![](../images/serverless-video-transcoder.png)
 
-## 实验环境
+## 1. 实验环境
 
 实验需要使用AWS账号和管理员用户。 您可以使用自己的AWS账号，或是使用AWS提供的实验账号。
 
-### Cloud9实例
+### 1.1 Cloud9实例
 
 在AWS Console中选择“俄勒冈州”区域，在服务菜单中选择“Cloud9”。
 ![](img/1.png)
@@ -21,7 +21,7 @@
 确认参数设置正确，点击“Create Enviroment”, 开始创建cloud9实例。等待一会儿，cloud9实例创建完成后，可以看到下面的界面。 
 ![](img/5.png)
 
-### 下载项目代码
+### 1.2 下载项目代码
 
 打开一个新的Terminal. 
 ![](img/6.png)
@@ -34,7 +34,9 @@ git clone https://github.com/bnusunny/serverless-video-transcoder.git
 cd serverless-video-transcoder/
 ```
 
-### 部署项目
+## 2. 部署项目
+
+### 2.1 下载项目
 
 通过AWS SAM CLI构建项目
 
@@ -56,7 +58,7 @@ sam deploy --region us-west-2 --stack-name serverless-video-transcoder --paramet
 几分钟后，部署完成。
 ![](img/9.png)
 
-### 扩展EBS空间
+### 2.2 扩展EBS空间
 
 Cloud9实例初始EBS卷容量较小，为10GB。运行下面的脚本，把EBS卷容量扩展为100GB。
 
@@ -66,7 +68,7 @@ quickstart/scripts/resize.sh 100
 ```
 ![](img/10.png)
 
-### 下载测试视频
+### 2.3 下载测试视频
 
 运行下面的脚本，下载测试视频文件。 
 
@@ -75,8 +77,9 @@ quickstart/scripts/download-videos.sh
 ```
 ![](img/11.png)
 
+## 3. 运行测试
 
-## 测试1：1080P 8分钟视频转码为720p
+### 3.1 测试1：1080P 8分钟视频转码为720p
 
 运行下面的命令来启动第一个测试。
 
@@ -94,7 +97,7 @@ aws s3 cp videos/topgun_8m_1080p.mp4 s3://$BUCKETNAME/input/topgun01/
 第一个测试视频是时长8分钟的1080p视频，在1分钟左右完成转码。
 ![](img/13.png)
 
-## 测试2: 1080p 1小时视频转码为720p
+### 3.2 测试2: 1080p 1小时视频转码为720p
 
 运行下面的命令来启动第二个测试。
 
@@ -113,7 +116,7 @@ aws s3 cp videos/beach_1h_1080p.mp4  s3://$BUCKETNAME/input/beach01/
 ![](img/17.png)
 
 
-## 清理环境
+## 4. 清理环境
 
 删除S3存储桶$BUCKETNAME中的所有视频，然后在[cloudformation](https://us-west-2.console.aws.amazon.com/cloudformation/home?region=us-west-2)中删除所有stack。
 
