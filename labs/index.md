@@ -50,12 +50,12 @@ sam deploy --guided
 修改下面的参数，其他参数保留默认值。
 "stack name"输入 serverless-video-transcoder
 "AWS Region"输入 us-west-2
-"VideosBucketName"输入 svt-<random>
+"VideosBucketName"输入 svt-<name>
 
 ![](img/8.png)
 
 几分钟后，部署完成。
-
+![](img/9.png)
 
 ### 扩展EBS空间
 
@@ -65,22 +65,58 @@ Cloud9实例初始EBS卷容量较小，为10GB。运行下面的脚本，把EBS
 quickstart/scripts/resize.sh 100
 
 ```
-
+![](img/10.png)
 
 ### 下载测试视频
 
+运行下面的脚本，下载测试视频文件。 
+
+```
+quickstart/scripts/download-videos.sh
+```
+![](img/11.png)
 
 
 ## 测试1：1080P 8分钟视频转码为720p
 
+运行下面的命令来启动第一个测试。注意要将svt-<name>改成您设置的值。
+
+```
+aws s3 cp videos/topgun_8m_1080p.mp4 s3://svt-<name>/input/topgun01/
+```
+打开[Step Functions Console](https://us-west-2.console.aws.amazon.com/states/home?region=us-west-2#), 查看转码工作流运行状态。
+
+![](img/12.png)
+
+当转码工作流结束后，在S3 console中下载output目录中输出的视频. 播放视频，检查转码质量。 
+
+![](img/14.png)
+
+第一个测试视频是时长8分钟的1080p视频，在1分钟左右完成转码。
+![](img/13.png)
 
 ## 测试2: 1080p 1小时视频转码为720p
 
+运行下面的命令来启动第二个测试。注意要将svt-<name>改成您设置的值。
+
+```
+aws s3 cp videos/beach_1h_1080p.mp4  s3://svt-<name>/input/beach01/
+```
+打开Step Functions Console, 查看转码工作流运行状态。
+
+![](img/15.png)
+
+当转码工作流结束后，在S3 console中下载output目录中输出的视频. 播放视频，检查转码质量。 
+
+![](img/16.png)
+
+第二个测试视频是时长60分钟的1080p视频，在4分钟左右完成转码。
+![](img/17.png)
 
 
+## 清理环境
 
-
-
+删除S3存储桶“svt-<name>”中的所有视频，然后在[cloudformation](https://us-west-2.console.aws.amazon.com/cloudformation/home?region=us-west-2)中删除对应的stack。
 
 
 
