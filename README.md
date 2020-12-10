@@ -6,9 +6,9 @@ Serverless视频转码：通过Step Functions, Lambda和EFS实现分布式视频
 
 ## 测试结果
 
-1. [测试文件](https://serverless-video-transcoder-bjs.s3.cn-north-1.amazonaws.com.cn/video/beach_1h_1080p.mp4) 1小时 1080p mp4 (h264, aac) 转码为720p mp4（h264, aac): 3分50秒
-2. [测试文件](https://serverless-video-transcoder-bjs.s3.cn-north-1.amazonaws.com.cn/video/topgun_8m_1080p.mp4) 8分钟 1080p mp4 (h264, aac) 转码为720p mp4 (h264, aac): 1分10秒
-3. [测试文件](https://serverless-video-transcoder-bjs.s3.cn-north-1.amazonaws.com.cn/video/topgun_8m_2160p60.mp4) 8分钟 2160p mp4 (h264, aac) 转码为720p mp4 (h264, aac): 2分23秒
+1. [测试文件](https://serverless-video-transcoder-bjs.s3.cn-north-1.amazonaws.com.cn/videos/beach_1h_1080p.mp4) 1小时 1080p mp4 (h264, aac) 转码为720p mp4（h264, aac): 3分50秒
+2. [测试文件](https://serverless-video-transcoder-bjs.s3.cn-north-1.amazonaws.com.cn/videos/topgun_8m_1080p.mp4) 8分钟 1080p mp4 (h264, aac) 转码为720p mp4 (h264, aac): 1分10秒
+3. [测试文件](https://serverless-video-transcoder-bjs.s3.cn-north-1.amazonaws.com.cn/videos/topgun_8m_2160p60.mp4) 8分钟 2160p mp4 (h264, aac) 转码为720p mp4 (h264, aac): 2分23秒
 
 
 
