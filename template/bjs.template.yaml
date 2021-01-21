@@ -56,7 +56,7 @@ Globals:
     MemorySize: 512
     Tracing: Active
     Layers:
-    - Fn::Sub: arn:${AWS::Partition}:lambda:${AWS::Region}:580247275435:layer:LambdaInsightsExtension:12
+    - Fn::Sub: arn:${AWS::Partition}:lambda:${AWS::Region}:488211338238:layer:LambdaInsightsExtension:4
 Resources:
   VideosBucket:
     Type: AWS::S3::Bucket
