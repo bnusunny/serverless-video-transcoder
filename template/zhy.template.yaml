@@ -155,7 +155,7 @@ Resources:
     Properties:
       CodeUri: s3://aws-quickstart-cn/serverless-video-transcoder/e4bd751a83108e3b8a8980b817bf043c
       Handler: app.lambda_handler
-      MemorySize: 10240
+      MemorySize: 1024
       Timeout: 900
       Environment:
         Variables:
@@ -200,7 +200,7 @@ Resources:
     Properties:
       CodeUri: s3://aws-quickstart-cn/serverless-video-transcoder/19bdbe4c065bca237fcbb839f50f9602
       Handler: app.lambda_handler
-      MemorySize: 10240
+      MemorySize: 3008
       Timeout: 900
       Environment:
         Variables:
@@ -242,7 +242,7 @@ Resources:
     Properties:
       CodeUri: s3://aws-quickstart-cn/serverless-video-transcoder/00eb9281c255efcf54dc63b225c82d68
       Handler: app.lambda_handler
-      MemorySize: 10240
+      MemorySize: 3008
       Timeout: 900
       Environment:
         Variables:
