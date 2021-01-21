@@ -56,6 +56,9 @@ Globals:
     Timeout: 30
     Runtime: python3.7
     MemorySize: 512
+    Tracing: Active
+    Layers:
+      - !Sub "arn:${AWS::Partition}:lambda:${AWS::Region}:580247275435:layer:LambdaInsightsExtension:12"
 
 Resources:
 
@@ -88,10 +91,12 @@ Resources:
             TableName: !Ref JobTable
         - StepFunctionsExecutionPolicy:
             StateMachineName: !GetAtt MainStateMachine.Name
+        - CloudWatchLambdaInsightsExecutionRolePolicy
       Environment:
         Variables:
           JOB_TABLE: !Ref JobTable
           SFN_ARN: !Ref MainStateMachine
+          DEFAULT_SEGMENT_TIME: 60
           ENABLE_HLS: 0
       Layers:
         - !Ref FFmpegLayer
@@ -116,34 +121,34 @@ Resources:
       Tracing:
         Enabled: True
       DefinitionSubstitutions:
-        SplitVideoFunctionArn: !GetAtt SplitVideoFunction.Arn
+        ControllerFunctionArn: !GetAtt ControllerFunction.Arn
         TranscodeVideoFunctionArn: !GetAtt TranscodeVideoFunction.Arn
         MergeVideoFunctionArn: !GetAtt MergeVideoFunction.Arn
-        GenerateHLSFunctionArn: !GetAtt GenerateHLSFunction.Arn
       Policies:
         - CloudWatchPutMetricPolicy: {}
         - CloudWatchLogsFullAccess
         - LambdaInvokePolicy:
-            FunctionName: !Ref SplitVideoFunction
+            FunctionName: !Ref ControllerFunction
         - LambdaInvokePolicy:
             FunctionName: !Ref TranscodeVideoFunction
         - LambdaInvokePolicy:
             FunctionName: !Ref MergeVideoFunction
-        - LambdaInvokePolicy:
-            FunctionName: !Ref GenerateHLSFunction
+        - CloudWatchLambdaInsightsExecutionRolePolicy
+        - AWSXRayDaemonWriteAccess
 
-  SplitVideoFunction:
+  ControllerFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: functions/split_video_function/
+      CodeUri: functions/controller_function/
       Handler: app.lambda_handler
-      MemorySize: 3008
+      MemorySize: 10240
       Timeout: 900
       Environment:
         Variables:
           EFS_PATH: !Ref EFSpath
           PARALLEL_GROUPS: 3
-          SEGMENT_TIME: 40
+          DEFAULT_CONCURENCY: 30
+          DEFAULT_SEGMENT_TIME: 30
       Layers:
         - !Ref FFmpegLayer
       Policies:
@@ -154,6 +159,7 @@ Resources:
         - EFSWriteAccessPolicy:
             FileSystem: !Ref FileSystemResource
             AccessPoint: !Ref AccessPointResource
+        - CloudWatchLambdaInsightsExecutionRolePolicy
       VpcConfig:
         SecurityGroupIds: 
         - !GetAtt VPC.DefaultSecurityGroup
@@ -165,13 +171,12 @@ Resources:
           LocalMountPath: !Ref EFSpath
     DependsOn: ["MountTargetResource1", "MountTargetResource2"]
 
-
   TranscodeVideoFunction:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: functions/transcode_video_function/
       Handler: app.lambda_handler
-      MemorySize: 3008
+      MemorySize: 10240
       Timeout: 900
       Environment:
         Variables:
@@ -186,6 +191,7 @@ Resources:
         - EFSWriteAccessPolicy:
             FileSystem: !Ref FileSystemResource
             AccessPoint: !Ref AccessPointResource
+        - CloudWatchLambdaInsightsExecutionRolePolicy
       VpcConfig:
         SecurityGroupIds: 
         - !GetAtt VPC.DefaultSecurityGroup
@@ -202,7 +208,7 @@ Resources:
     Properties:
       CodeUri: functions/merge_video_function/
       Handler: app.lambda_handler
-      MemorySize: 3008
+      MemorySize: 10240
       Timeout: 900
       Environment:
         Variables:
@@ -218,6 +224,7 @@ Resources:
         - EFSWriteAccessPolicy:
             FileSystem: !Ref FileSystemResource
             AccessPoint: !Ref AccessPointResource
+        - CloudWatchLambdaInsightsExecutionRolePolicy
       VpcConfig:
         SecurityGroupIds: 
         - !GetAtt VPC.DefaultSecurityGroup
@@ -228,39 +235,6 @@ Resources:
         - Arn: !Sub "arn:${AWS::Partition}:elasticfilesystem:${AWS::Region}:${AWS::AccountId}:access-point/${AccessPointResource}"
           LocalMountPath: !Ref EFSpath
     DependsOn: ["MountTargetResource1", "MountTargetResource2"]
-
-
-  GenerateHLSFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: functions/generate_hls_function/
-      Handler: app.lambda_handler
-      MemorySize: 3008
-      Timeout: 900
-      Environment:
-        Variables:
-          EFS_PATH: !Ref EFSpath
-      Layers:
-        - !Ref FFmpegLayer
-      Policies:
-        - S3ReadPolicy:
-            BucketName: !Ref VideosBucketName
-        - S3WritePolicy:
-            BucketName: !Ref VideosBucketName
-        - EFSWriteAccessPolicy:
-            FileSystem: !Ref FileSystemResource
-            AccessPoint: !Ref AccessPointResource
-      VpcConfig:
-        SecurityGroupIds: 
-        - !GetAtt VPC.DefaultSecurityGroup
-        SubnetIds: 
-        - !Ref PublicSubnet1
-        - !Ref PublicSubnet2
-      FileSystemConfigs:
-        - Arn: !Sub "arn:${AWS::Partition}:elasticfilesystem:${AWS::Region}:${AWS::AccountId}:access-point/${AccessPointResource}"
-          LocalMountPath: !Ref EFSpath
-    DependsOn: ["MountTargetResource1", "MountTargetResource2"]
-
 
   VPC:
     Type: AWS::EC2::VPC

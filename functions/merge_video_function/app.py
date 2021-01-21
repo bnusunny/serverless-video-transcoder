@@ -48,11 +48,11 @@ def lambda_handler(event, context):
 
     # upload merged media to S3
     job_id = download_dir.split("/")[-1]
-    object_name = re.sub('_seg_.*', '.mp4', event[0][0]['transcoded_segment'])
+    object_name = event[0][0]['object_name']
 
     bucket = os.environ['MEDIA_BUCKET']
     key = 'output/{}/{}'.format(job_id, object_name)
-    s3_client.upload_file(merged_file, bucket, key)
+    s3_client.upload_file(merged_file, bucket, key, ExtraArgs={'ContentType': 'video/mp4'})
     # delete the temp download directory
     shutil.rmtree(download_dir)
 
@@ -60,5 +60,7 @@ def lambda_handler(event, context):
         'download_dir': download_dir,
         'input_segments': len(segment_list),
         'merged_video': merged_file,
-        'create_hls': 0
+        'create_hls': 0,
+        'output_bucket': bucket,
+        'output_key': key
     }

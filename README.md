@@ -19,10 +19,11 @@ Serverless视频转码：通过Step Functions, Lambda和EFS实现分布式视频
 
 使用Quickstart/templates目录下的CloudFormation模版，可以快速完成部署。这个模版会新建带有两个公有子网的VPC, S3和DynamoDB Endpoints, S3存储桶，DyanomDB表，EFS文件系统, Lambda函数和Step Functions状态机。
 
-|           Region            |                     Launch Stack in VPC                      | 
-| :-------------------------: | :----------------------------------------------------------: | 
-| **北京** (cn-north-1)   | [![cloudformation-launch-stack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.amazonaws.cn/cloudformation/home?region=cn-north-1#/stacks/new?stackName=serverless-video-transcoder&templateURL=https://aws-quickstart-cn.s3.cn-northwest-1.amazonaws.com.cn/serverless-video-transcoder/main.template.yaml) | 
-| **宁夏** (cn-northwest-1) | [![cloudformation-launch-stack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.amazonaws.cn/cloudformation/home?region=cn-northwest-1#/stacks/new?stackName=serverless-video-transcoder&templateURL=https://aws-quickstart-cn.s3.cn-northwest-1.amazonaws.com.cn/serverless-video-transcoder/main.template.yaml) | 
+|           Region            |                     Launch Stack in VPC                      |
+| :-------------------------: | :----------------------------------------------------------: |
+| **北京** (cn-north-1)   | [![cloudformation-launch-stack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.amazonaws.cn/cloudformation/home?region=cn-north-1#/stacks/new?stackName=serverless-video-transcoder&templateURL=https://aws-quickstart-cn.s3.cn-northwest-1.amazonaws.com.cn/serverless-video-transcoder/main.template.yaml) |
+| **宁夏** (cn-northwest-1) | [![cloudformation-launch-stack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.amazonaws.cn/cloudformation/home?region=cn-northwest-1#/stacks/new?stackName=serverless-video-transcoder&templateURL=https://aws-quickstart-cn.s3.cn-northwest-1.amazonaws.com.cn/serverless-video-transcoder/main.template.yaml) |
+| **US East(N. Virginia)** (us-east-1) | [![cloudformation-launch-stack](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=serverless-video-transcoder&templateURL=https://serverless-video-transcoder.s3.amazonaws.com/templates/template.yaml) |
 
 ### 手工部署
 1. 使用现有vpc，选择两个子网，记录子网ID，也可以新建VPC。子网需要能够访问S3和DynamoDB。建议通过S3,DynamoDB endpoint。
