@@ -1,0 +1,9 @@
+{
+    "job_id": "240f4e64-50ac-480b-bb2f-613a4d5ad391",
+    "bucket": "sls-northeast-1",
+    "key": "input/wildlife01/wildlife_1h_4k.mp4",
+    "object_prefix": "input/wildlife01/",
+    "object_name": "wildlife_1h_4k.mp4",
+    "segment_time": "120",
+    "create_hls": "0"
+}

@@ -249,3 +249,5 @@ $RECYCLE.BIN/
 samconfig.toml
 .aws-sam
 packaged.yaml
+
+efs

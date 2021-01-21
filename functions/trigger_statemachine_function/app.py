@@ -4,10 +4,15 @@ import os
 import uuid
 import datetime
 from urllib.parse import unquote_plus
+from aws_xray_sdk.core import xray_recorder
+from aws_xray_sdk.core import patch_all
+
+patch_all()
 
 dynamodb = boto3.resource('dynamodb')
 job_table = dynamodb.Table(os.environ['JOB_TABLE'])
 create_hls = os.environ['ENABLE_HLS']
+segment_time = os.environ['DEFAULT_SEGMENT_TIME']
 sfn_client = boto3.client('stepfunctions')
 
 
@@ -40,6 +45,7 @@ def lambda_handler(event, context):
                 'key': key,
                 'object_prefix': object_prefix,
                 'object_name': object_name,
+                "segment_time": segment_time,
                 'create_hls': create_hls
             })
         )

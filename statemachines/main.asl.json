@@ -1,119 +1,136 @@
 {
-    "Comment": "main workflow for video transcode",
-    "StartAt": "SplitVideo",
-    "States": {
-        "SplitVideo": {
-            "Comment": "split video into small segements.",
-            "Type": "Task",
-            "Resource": "${SplitVideoFunctionArn}",
-            "Next": "Parallel Video Groups"
-        },
-        "Parallel Video Groups": {
-            "Comment": "Processing audio and video in parallel.",
-            "Type": "Parallel",
-            "Branches": [
-                {
-                    "StartAt": "VideoSegmentMapGroup0",
-                    "States": {
-                        "VideoSegmentMapGroup0": {
-                            "Type": "Map",
-                            "InputPath": "$.[0]",
-                            "ItemsPath": "$.video_segments",
-                            "Parameters": {
-                                "download_dir.$": "$.download_dir",
-                                "video_segments.$": "$$.Map.Item.Value"
-                            },
-                            "Iterator": {
-                                "StartAt": "TranscodeVideoGroup0",
-                                "States": {
-                                    "TranscodeVideoGroup0": {
-                                        "Type": "Task",
-                                        "Resource": "${TranscodeVideoFunctionArn}",
-                                        "End": true
-                                    }
-                                }
-                            },
-                            "End": true
-                        }
-                    }
-                },
-                {
-                    "StartAt": "VideoSegmentMapGroup1",
-                    "States": {
-                        "VideoSegmentMapGroup1": {
-                            "Type": "Map",
-                            "InputPath": "$.[1]",
-                            "ItemsPath": "$.video_segments",
-                            "Parameters": {
-                                "download_dir.$": "$.download_dir",
-                                "video_segments.$": "$$.Map.Item.Value"
-                            },
-                            "Iterator": {
-                                "StartAt": "TranscodeVideoGroup1",
-                                "States": {
-                                    "TranscodeVideoGroup1": {
-                                        "Type": "Task",
-                                        "Resource": "${TranscodeVideoFunctionArn}",
-                                        "End": true
-                                    }
-                                }
-                            },
-                            "End": true
-                        }
-                    }
-                },
-                {
-                    "StartAt": "VideoSegmentMapGroup2",
-                    "States": {
-                        "VideoSegmentMapGroup2": {
-                            "Type": "Map",
-                            "InputPath": "$.[2]",
-                            "ItemsPath": "$.video_segments",
-                            "Parameters": {
-                                "download_dir.$": "$.download_dir",
-                                "video_segments.$": "$$.Map.Item.Value"
-                            },
-                            "Iterator": {
-                                "StartAt": "TranscodeVideoGroup2",
-                                "States": {
-                                    "TranscodeVideoGroup2": {
-                                        "Type": "Task",
-                                        "Resource": "${TranscodeVideoFunctionArn}",
-                                        "End": true
-                                    }
-                                }
-                            },
-                            "End": true
-                        }
-                    }
+  "Comment": "main workflow for video transcode",
+  "StartAt": "Controller",
+  "States": {
+    "Controller": {
+      "Comment": "analyize the video and generate control data for next step.",
+      "Type": "Task",
+      "Resource": "${ControllerFunctionArn}",
+      "ResultPath": "$.control_data",
+      "Next": "Parallel Video Groups"
+    },
+    "Parallel Video Groups": {
+      "Comment": "Processing audio and video in parallel.",
+      "Type": "Parallel",
+      "Branches": [
+        {
+          "StartAt": "VideoSegmentMapGroup0",
+          "States": {
+            "VideoSegmentMapGroup0": {
+              "Type": "Map",
+              "InputPath": "$.control_data",
+              "ItemsPath": "$.video_groups[0]",
+              "Parameters": {
+                "presigned_url.$": "$.video_details.format.filename",
+                "download_dir.$": "$.download_dir",
+                "object_name.$": "$.object_name",
+                "video_segment.$": "$$.Map.Item.Value"
+              },
+              "Iterator": {
+                "StartAt": "TranscodeVideoGroup0",
+                "States": {
+                  "TranscodeVideoGroup0": {
+                    "Type": "Task",
+                    "Resource": "${TranscodeVideoFunctionArn}",
+                    "End": true
+                  }
                 }
-            ],
-            "Next": "MergeVideo"
-        },
-        "MergeVideo": {
-            "Type": "Task",
-            "Resource": "${MergeVideoFunctionArn}",
-            "Next": "Create HLS?"
-        },            
-        "Create HLS?": {
-            "Type": "Choice",
-            "Choices": [
+              },
+              "Retry": [
                 {
-                    "Variable": "$.create_hls",
-                    "NumericEquals": 1,
-                    "Next": "GenerateHLS"
+                  "ErrorEquals": [
+                    "States.TaskFailed"
+                  ],
+                  "IntervalSeconds": 1,
+                  "MaxAttempts": 2,
+                  "BackoffRate": 1.5
                 }
-            ],
-            "Default": "No"
+              ],
+              "End": true
+            }
+          }
         },
-        "GenerateHLS": {
-            "Type": "Task",
-            "Resource": "${GenerateHLSFunctionArn}",
-            "End": true
+        {
+          "StartAt": "VideoSegmentMapGroup1",
+          "States": {
+            "VideoSegmentMapGroup1": {
+              "Type": "Map",
+              "InputPath": "$.control_data",
+              "ItemsPath": "$.video_groups[1]",
+              "Parameters": {
+                "presigned_url.$": "$.video_details.format.filename",
+                "download_dir.$": "$.download_dir",
+                "object_name.$": "$.object_name",
+                "video_segment.$": "$$.Map.Item.Value"
+              },
+              "Iterator": {
+                "StartAt": "TranscodeVideoGroup1",
+                "States": {
+                  "TranscodeVideoGroup1": {
+                    "Type": "Task",
+                    "Resource": "${TranscodeVideoFunctionArn}",
+                    "End": true
+                  }
+                }
+              },
+              "Retry": [
+                {
+                  "ErrorEquals": [
+                    "States.TaskFailed"
+                  ],
+                  "IntervalSeconds": 1,
+                  "MaxAttempts": 2,
+                  "BackoffRate": 1.5
+                }
+              ],
+              "End": true
+            }
+          }
         },
-        "No": {
-            "Type": "Pass",
-            "End": true
+        {
+          "StartAt": "VideoSegmentMapGroup2",
+          "States": {
+            "VideoSegmentMapGroup2": {
+              "Type": "Map",
+              "InputPath": "$.control_data",
+              "ItemsPath": "$.video_groups[2]",
+              "Parameters": {
+                "presigned_url.$": "$.video_details.format.filename",
+                "download_dir.$": "$.download_dir",
+                "object_name.$": "$.object_name",
+                "video_segment.$": "$$.Map.Item.Value"
+              },
+              "Iterator": {
+                "StartAt": "TranscodeVideoGroup2",
+                "States": {
+                  "TranscodeVideoGroup2": {
+                    "Type": "Task",
+                    "Resource": "${TranscodeVideoFunctionArn}",
+                    "End": true
+                  }
+                }
+              },
+              "Retry": [
+                {
+                  "ErrorEquals": [
+                    "States.TaskFailed"
+                  ],
+                  "IntervalSeconds": 1,
+                  "MaxAttempts": 2,
+                  "BackoffRate": 1.5
+                }
+              ],
+              "End": true
+            }
+          }
         }
+      ],
+      "Next": "MergeVideo"
+    },
+    "MergeVideo": {
+      "Type": "Task",
+      "Resource": "${MergeVideoFunctionArn}",
+      "End": true
     }
+  }
 }
