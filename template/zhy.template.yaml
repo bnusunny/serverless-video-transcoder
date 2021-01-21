@@ -9,8 +9,8 @@ Metadata:
     Description: Serverless Video Transcoder
     Author: Harold Sun
     SpdxLicenseId: Apache-2.0
-    LicenseUrl: s3://serverless-video-transcoder-cn-north-1/assets/2b42edef8fa55315f34f2370b4715ca9
-    ReadmeUrl: s3://serverless-video-transcoder-cn-north-1/assets/896ebbdc2d03da0447c67e83ce8cd1ac
+    LicenseUrl: s3://aws-quickstart-cn/serverless-video-transcoder/2b42edef8fa55315f34f2370b4715ca9
+    ReadmeUrl: s3://aws-quickstart-cn/serverless-video-transcoder/77df72752e66dd06245aa05803e905fe
     Labels:
     - S3
     - Lambda
@@ -56,7 +56,7 @@ Globals:
     MemorySize: 512
     Tracing: Active
     Layers:
-    - Fn::Sub: arn:${AWS::Partition}:lambda:${AWS::Region}:580247275435:layer:LambdaInsightsExtension:12
+    - Fn::Sub: arn:${AWS::Partition}:lambda:${AWS::Region}:488211338238:layer:LambdaInsightsExtension:4
 Resources:
   VideosBucket:
     Type: AWS::S3::Bucket
@@ -68,7 +68,7 @@ Resources:
   FFmpegLayer:
     Type: AWS::Serverless::LayerVersion
     Properties:
-      ContentUri: s3://serverless-video-transcoder-cn-north-1/assets/b58ac6543eb64e6cefc1bab452d893ca
+      ContentUri: s3://aws-quickstart-cn/serverless-video-transcoder/b58ac6543eb64e6cefc1bab452d893ca
       CompatibleRuntimes:
       - python3.8
       - python3.7
@@ -76,7 +76,7 @@ Resources:
   TriggerFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: s3://serverless-video-transcoder-cn-north-1/assets/429a76628dfece1d981f316d242a5584
+      CodeUri: s3://aws-quickstart-cn/serverless-video-transcoder/429a76628dfece1d981f316d242a5584
       Handler: app.lambda_handler
       Policies:
       - S3ReadPolicy:
@@ -119,8 +119,8 @@ Resources:
     Type: AWS::Serverless::StateMachine
     Properties:
       DefinitionUri:
-        Bucket: serverless-video-transcoder-cn-north-1
-        Key: assets/545682c6071f3deab46b0e80036d4cce
+        Bucket: aws-quickstart-cn
+        Key: serverless-video-transcoder/545682c6071f3deab46b0e80036d4cce
       Tracing:
         Enabled: true
       DefinitionSubstitutions:
@@ -153,7 +153,7 @@ Resources:
   ControllerFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: s3://serverless-video-transcoder-cn-north-1/assets/e4bd751a83108e3b8a8980b817bf043c
+      CodeUri: s3://aws-quickstart-cn/serverless-video-transcoder/e4bd751a83108e3b8a8980b817bf043c
       Handler: app.lambda_handler
       MemorySize: 10240
       Timeout: 900
@@ -198,7 +198,7 @@ Resources:
   TranscodeVideoFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: s3://serverless-video-transcoder-cn-north-1/assets/19bdbe4c065bca237fcbb839f50f9602
+      CodeUri: s3://aws-quickstart-cn/serverless-video-transcoder/19bdbe4c065bca237fcbb839f50f9602
       Handler: app.lambda_handler
       MemorySize: 10240
       Timeout: 900
@@ -240,7 +240,7 @@ Resources:
   MergeVideoFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: s3://serverless-video-transcoder-cn-north-1/assets/00eb9281c255efcf54dc63b225c82d68
+      CodeUri: s3://aws-quickstart-cn/serverless-video-transcoder/00eb9281c255efcf54dc63b225c82d68
       Handler: app.lambda_handler
       MemorySize: 10240
       Timeout: 900
