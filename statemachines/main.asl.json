@@ -7,6 +7,16 @@
       "Type": "Task",
       "Resource": "${ControllerFunctionArn}",
       "ResultPath": "$.control_data",
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "States.TaskFailed"
+          ],
+          "IntervalSeconds": 1,
+          "MaxAttempts": 2,
+          "BackoffRate": 1.5
+        }
+      ],
       "Next": "Parallel Video Groups"
     },
     "Parallel Video Groups": {

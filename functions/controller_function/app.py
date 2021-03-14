@@ -7,7 +7,7 @@ from urllib.parse import unquote_plus
 from botocore.config import Config
 
 s3_client = boto3.client('s3', os.environ['AWS_REGION'], config=Config(
-    s3={'addressing_style': 'path'}))
+    s3={'addressing_style': 'path', 'signature_version': 's3v4'}))
 efs_path = os.environ['EFS_PATH']
 PARALLEL_GROUPS = int(os.environ['PARALLEL_GROUPS'])
 MAX_CONCURRENCY_MAP = 40
